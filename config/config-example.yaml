@@ -1,12 +1,18 @@
-setupCaCertsImage: zezaeoh/setup-ca-certs:latest
-caCertsData: |-
-  -----BEGIN CERTIFICATE-----
-  MIIBbjCCAROgAwIBAgIQE6ttkwhxiyWXdGyCYeXx2TAKBggqhkjOPQQDAjAVMRMw
-  EQYDVQQDEwp6ZXphZW9oLmlvMB4XDTIyMDMwMTExMDMxM1oXDTMyMDIyNzExMDMx
-  M1owFTETMBEGA1UEAxMKemV6YWVvaC5pbzBZMBMGByqGSM49AgEGCCqGSM49AwEH
-  A0IABHX/JsHeUP4N3nqPrvxomMfEAZuVNZ4gqUxkYfZ4zBeInce/l0VJ3zs6T1UF
-  CCrfz4Ikh808Hqn0WOkuuTrjAfqjRTBDMA4GA1UdDwEB/wQEAwIBBjASBgNVHRMB
-  Af8ECDAGAQH/AgEBMB0GA1UdDgQWBBRZCI0gAEYflEredZJdcb4g8TaCSzAKBggq
-  hkjOPQQDAgNJADBGAiEA6r77RFykldPNKKIzyazuDjQltBQpP5FXJH8u3jDx3tYC
-  IQDo8vaYB9ySwxkM4aQvEZVvOUZf/uYVkwenThmIxDbw8w==
-  -----END CERTIFICATE-----
+webhook:
+  configName: knurse-webhook
+
+  caCerts:
+    name: "ca-certs.webhook.knurse.zezaeoh.io"
+    path: "/cacerts"
+    setupCaCertsImage: zezaeoh/setup-ca-certs:latest
+    data: |-
+      -----BEGIN CERTIFICATE-----
+      MIIBbjCCAROgAwIBAgIQE6ttkwhxiyWXdGyCYeXx2TAKBggqhkjOPQQDAjAVMRMw
+      EQYDVQQDEwp6ZXphZW9oLmlvMB4XDTIyMDMwMTExMDMxM1oXDTMyMDIyNzExMDMx
+      M1owFTETMBEGA1UEAxMKemV6YWVvaC5pbzBZMBMGByqGSM49AgEGCCqGSM49AwEH
+      A0IABHX/JsHeUP4N3nqPrvxomMfEAZuVNZ4gqUxkYfZ4zBeInce/l0VJ3zs6T1UF
+      CCrfz4Ikh808Hqn0WOkuuTrjAfqjRTBDMA4GA1UdDwEB/wQEAwIBBjASBgNVHRMB
+      Af8ECDAGAQH/AgEBMB0GA1UdDgQWBBRZCI0gAEYflEredZJdcb4g8TaCSzAKBggq
+      hkjOPQQDAgNJADBGAiEA6r77RFykldPNKKIzyazuDjQltBQpP5FXJH8u3jDx3tYC
+      IQDo8vaYB9ySwxkM4aQvEZVvOUZf/uYVkwenThmIxDbw8w==
+      -----END CERTIFICATE-----

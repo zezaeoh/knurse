@@ -29,11 +29,11 @@ import (
 	pkgreconciler "knative.dev/pkg/reconciler"
 	certresources "knative.dev/pkg/webhook/certificates/resources"
 
-	"github.com/zezaeoh/knurse/internal/config"
 	"github.com/zezaeoh/knurse/internal/enum"
 )
 
 const (
+	initContainerName = "setup-ca-certs"
 	caCertsVolumeName = "ca-certs"
 	caCertsMountPath  = "/etc/ssl/certs"
 )
@@ -48,17 +48,18 @@ type reconciler struct {
 	pkgreconciler.LeaderAwareFuncs
 
 	key  types.NamespacedName
+	name string
 	path string
 
 	withContext func(context.Context) context.Context
-	config      config.Config
 
 	client       kubernetes.Interface
 	mwhlister    admissionlisters.MutatingWebhookConfigurationLister
 	secretlister corelisters.SecretLister
 
-	disallowUnknownFields bool
-	secretName            string
+	secretName        string
+	caCertData        string
+	setupCaCertsImage string
 }
 
 // Reconcile implements controller.Reconciler
@@ -102,7 +103,7 @@ func (ac *reconciler) Admit(ctx context.Context, request *admissionv1.AdmissionR
 	}
 
 	switch request.Operation {
-	case admissionv1.Create, admissionv1.Update:
+	case admissionv1.Create:
 	default:
 		logger.Info("Unhandled webhook operation, letting it through ", request.Operation)
 		return &admissionv1.AdmissionResponse{Allowed: true}
@@ -128,7 +129,6 @@ func (ac *reconciler) Admit(ctx context.Context, request *admissionv1.AdmissionR
 	if err != nil {
 		return webhook.MakeErrorStatus("mutation failed: %v", err)
 	}
-	logger.Infof("Kind: %q PatchBytes: %v", request.Kind, string(patchBytes))
 
 	return &admissionv1.AdmissionResponse{
 		Patch:   patchBytes,
@@ -150,7 +150,7 @@ func (ac *reconciler) reconcileMutatingWebhook(ctx context.Context, caCert []byt
 
 	current := configuredWebhook.DeepCopy()
 	for i, wh := range current.Webhooks {
-		if wh.Name != current.Name {
+		if wh.Name != ac.name {
 			continue
 		}
 		cur := &current.Webhooks[i]
@@ -231,7 +231,7 @@ func (ac *reconciler) setInitContainerForCaCerts(ctx context.Context, patches du
 }
 
 func (ac *reconciler) setCaCerts(ctx context.Context, obj *corev1.Pod) {
-	if ac.config.CaCertsData == "" {
+	if ac.caCertData == "" {
 		return
 	}
 
@@ -256,12 +256,12 @@ func (ac *reconciler) setCaCerts(ctx context.Context, obj *corev1.Pod) {
 	}
 
 	container := corev1.Container{
-		Name:  "setup-ca-certs",
-		Image: ac.config.SetupCaCertsImage,
+		Name:  initContainerName,
+		Image: ac.setupCaCertsImage,
 		Env: []corev1.EnvVar{
 			{
 				Name:  enum.SETUP_CA_CERT_DATA,
-				Value: ac.config.CaCertsData,
+				Value: ac.caCertData,
 			},
 		},
 		ImagePullPolicy: corev1.PullIfNotPresent,

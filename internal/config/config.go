@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
@@ -8,9 +9,17 @@ import (
 )
 
 type Config struct {
-	ConfigDir         string
-	SetupCaCertsImage string `yaml:"setupCaCertsImage"`
-	CaCertsData       string `yaml:"caCertsData"`
+	ConfigDir string
+
+	Webhook struct {
+		ConfigName string `yaml:"configName"`
+		CaCerts    struct {
+			Name              string `yaml:"name"`
+			Path              string `yaml:"path"`
+			Data              string `yaml:"data"`
+			SetupCaCertsImage string `yaml:"setupCaCertsImage"`
+		} `yaml:"caCerts"`
+	} `yaml:"webhook"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -58,5 +67,17 @@ func parseConfig(b []byte) (*Config, error) {
 }
 
 func validateConfig(cfg *Config) error {
+	if cfg.Webhook.ConfigName == "" {
+		return errors.New("webhook.configName: required but empty")
+	}
+	if cfg.Webhook.CaCerts.Name == "" {
+		return errors.New("webhook.caCerts.name: required but empty")
+	}
+	if cfg.Webhook.CaCerts.Path == "" {
+		return errors.New("webhook.caCerts.path: required but empty")
+	}
+	if cfg.Webhook.CaCerts.SetupCaCertsImage == "" {
+		return errors.New("webhook.caCerts.setupCaCertsImage: required but empty")
+	}
 	return nil
 }

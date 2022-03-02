@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"github.com/zezaeoh/knurse/internal/config"
+	"github.com/zezaeoh/knurse/internal/webhook/cacerts"
+	"knative.dev/pkg/configmap"
+	"knative.dev/pkg/controller"
 	"knative.dev/pkg/webhook/certificates"
+	"log"
 	"os"
 	"strconv"
 
@@ -47,5 +52,18 @@ func main() {
 
 	sharedmain.MainWithContext(ctx, "knurse",
 		certificates.NewController,
+		caCertsAdmissionController,
+	)
+}
+
+func caCertsAdmissionController(ctx context.Context, _ configmap.Watcher) *controller.Impl {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Fail to get config: %s", err)
+	}
+	return cacerts.NewAdmissionController(
+		ctx,
+		cfg,
+		nil,
 	)
 }
