@@ -1,0 +1,9 @@
+.idea
+.DS_Store
+README.md
+Dockerfile
+.gitignore
+charts
+config
+/knurse
+/setup-ca-certs

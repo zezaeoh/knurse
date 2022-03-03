@@ -10,11 +10,14 @@ run-server:
 go-test: go-tidy
 	go test -v ./...
 
-go-build:
-	go build -o knurse cmd/webhook/main.go
-
 go-fmt: go-tidy
 	go fmt ./...
 
 go-tidy:
 	go mod tidy
+
+build-webhook:
+	go build -o knurse cmd/webhook/main.go
+
+build-setup-ca-certs:
+	go build -o setup-ca-certs cmd/setup-ca-certs/main.go

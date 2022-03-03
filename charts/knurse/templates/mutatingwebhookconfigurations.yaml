@@ -1,0 +1,26 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ tpl .Values.app.config.webhook.configName . }}
+  labels:
+    {{- include "knurse.labels" . | nindent 4 }}
+webhooks:
+  - name: {{ .Values.app.config.webhook.caCerts.name }}
+    namespaceSelector:
+      {{- toYaml .Values.app.namespaceSelector | trim | nindent 6 }}
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ include "knurse.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        path: {{ .Values.app.config.webhook.caCerts.path }}
+        port: {{ .Values.service.port }}
+    failurePolicy: Ignore
+    matchPolicy: Exact
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    sideEffects: None

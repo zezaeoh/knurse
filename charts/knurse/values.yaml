@@ -1,0 +1,106 @@
+# Default values for knurse.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+app:
+  containerPort: 8443
+
+  livenessProbe:
+#    httpGet:
+#      path: /
+#      port: http
+#    initialDelaySeconds: 5
+  readinessProbe:
+#    httpGet:
+#      path: /
+#      port: http
+#    initialDelaySeconds: 3
+
+  # -- Namespace selector used by admission webhook. If not set defaults to all
+  # namespaces without the annotation
+  namespaceSelector:
+    matchExpressions:
+      - key: config.knurse.zezaeoh.io/admission-webhooks
+        operator: NotIn
+        values:
+          - disabled
+
+  config:
+    webhook:
+      configName: '{{ include "knurse.fullname" . }}-webhook'
+      caCerts:
+        name: "ca-certs.webhook.knurse.zezaeoh.io"
+        path: "/cacerts"
+        setupCaCertsImage: zezaeoh/setup-ca-certs:0.1.0
+        data: |-
+          -----BEGIN CERTIFICATE-----
+          MIIBbjCCAROgAwIBAgIQE6ttkwhxiyWXdGyCYeXx2TAKBggqhkjOPQQDAjAVMRMw
+          EQYDVQQDEwp6ZXphZW9oLmlvMB4XDTIyMDMwMTExMDMxM1oXDTMyMDIyNzExMDMx
+          M1owFTETMBEGA1UEAxMKemV6YWVvaC5pbzBZMBMGByqGSM49AgEGCCqGSM49AwEH
+          A0IABHX/JsHeUP4N3nqPrvxomMfEAZuVNZ4gqUxkYfZ4zBeInce/l0VJ3zs6T1UF
+          CCrfz4Ikh808Hqn0WOkuuTrjAfqjRTBDMA4GA1UdDwEB/wQEAwIBBjASBgNVHRMB
+          Af8ECDAGAQH/AgEBMB0GA1UdDgQWBBRZCI0gAEYflEredZJdcb4g8TaCSzAKBggq
+          hkjOPQQDAgNJADBGAiEA6r77RFykldPNKKIzyazuDjQltBQpP5FXJH8u3jDx3tYC
+          IQDo8vaYB9ySwxkM4aQvEZVvOUZf/uYVkwenThmIxDbw8w==
+          -----END CERTIFICATE-----
+
+image:
+  repository: zezaeoh/knurse
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+deployment:
+  revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 10%
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: knurse
+description: A Helm chart for Kubernetes
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+maintainers:
+- name: jaegeon Oh
+  email: zezaeoh@gmail.com

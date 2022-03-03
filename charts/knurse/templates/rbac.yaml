@@ -1,0 +1,94 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "knurse.fullname" . }}-role
+  labels:
+    {{- include "knurse.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - create
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames:
+      - {{ include "knurse.fullname" . }}-webhook-tls
+    verbs:
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "knurse.fullname" . }}-role-binding
+  annotations:
+    {{- include "knurse.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "knurse.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "knurse.fullname" . }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "knurse.fullname" . }}-cluster-role
+  annotations:
+    {{- include "knurse.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - mutatingwebhookconfigurations
+    resourceNames:
+      - {{ tpl .Values.app.config.webhook.configName . }}
+    verbs:
+      - update
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - mutatingwebhookconfigurations
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "knurse.fullname" . }}-cluster-role-binding
+  annotations:
+    {{- include "knurse.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "knurse.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "knurse.fullname" . }}-cluster-role
+  apiGroup: rbac.authorization.k8s.io
